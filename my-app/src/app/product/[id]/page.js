@@ -1,8 +1,8 @@
 import React from "react";
 import Image from "next/image";
-
+import AddToCart from "../../components/AddToCart";
 async function Page({ params }) {
-  const { id } = await params;
+  const { id } =  await params;
 
   const res = await fetch(
     `http://localhost:5000/api/products/${id}`,
@@ -10,7 +10,7 @@ async function Page({ params }) {
       cache: "no-store",
     }
   );
-
+``
   const product = await res.json();
   console.log("ID:", id);
 console.log("PRODUCT:", product);
@@ -35,6 +35,7 @@ console.log("PRODUCT:", product);
       alt={product.title}
       width={200}
       height={200}
+        loading="eager"
       className="object-contain"
       unoptimized
     />
@@ -52,14 +53,14 @@ console.log("PRODUCT:", product);
         <p className="mt-4 text-2xl font-bold text-red-500">
           ${product.price}
         </p>
-
+ 
         <p className="mt-2">
           Stock: {product.stock}
         </p>
 
-        <button className="mt-6 px-6 py-3 bg-black text-white rounded">
-          Add To Cart
-        </button>
+        <div  className="mt-6 px-6 py-3 bg-black text-white rounded">
+        <AddToCart productId={product._id} />
+        </div>
       </div>
       </div>
     </div>

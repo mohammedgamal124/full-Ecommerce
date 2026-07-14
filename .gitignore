@@ -1,0 +1,5 @@
+node_modules/
+back-app/node_modules/
+my-app/node_modules/
+.next/
+.env

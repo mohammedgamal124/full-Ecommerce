@@ -2,12 +2,11 @@
 import { useState, useEffect } from "react";
 
 function CartPage() {
-  // 1. Create state to hold the cart data and loading/error states
+  // جعل القيمة الابتدائية مصفوفة فارغة دائماً لتجنب مشاكل الـ رندر الأولية
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 2. Use useEffect to fetch data once when the component mounts
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -23,7 +22,13 @@ function CartPage() {
         }
 
         const data = await response.json();
-        setCartItems(data); // Assuming your API returns an array of items
+        
+        // استخراج مصفوفة العناصر (items) من داخل كائن السلة (cart)
+        if (data && data.cart && data.cart.items) {
+          setCartItems(data.cart.items);
+        } else {
+          setCartItems([]);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -32,9 +37,8 @@ function CartPage() {
     };
 
     fetchCart();
-  }, []); // Empty dependency array ensures this runs only once
+  }, []);
 
-  // 3. Handle loading and error states gracefully
   if (loading) return <div className="p-4 text-center">Loading your cart...</div>;
   if (error) return <div className="p-4 text-red-500 text-center">Error: {error}</div>;
 
@@ -44,7 +48,7 @@ function CartPage() {
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
-            <tr>
+            <tr className="bg-gray-100">
               <th className="py-2 px-4 border-b">Product</th>
               <th className="py-2 px-4 border-b">Price</th>
               <th className="py-2 px-4 border-b">Quantity</th>
@@ -52,7 +56,6 @@ function CartPage() {
             </tr>
           </thead>
           <tbody>
-            {/* 4. Map over the fetched cart items to display them */}
             {cartItems.length === 0 ? (
               <tr>
                 <td colSpan="4" className="py-4 text-center text-gray-500">
@@ -61,12 +64,14 @@ function CartPage() {
               </tr>
             ) : (
               cartItems.map((item) => (
-                <tr key={item.id} className="text-center hover:bg-gray-50">
-                  <td className="py-2 px-4 border-b">{item.productName}</td>
-                  <td className="py-2 px-4 border-b">${item.price.toFixed(2)}</td>
+                // استخدام الـ _id الخاص بالمنتج كـ key فريد
+                <tr key={item._id || item.product?._id} className="text-center hover:bg-gray-50">
+                  {/* تم تعديل الحقل هنا ليقرأ title بدلاً من name ليطابق الـ Schema */}
+                  <td className="py-2 px-4 border-b">{item.product?.title || "Unknown Product"}</td>
+                  <td className="py-2 px-4 border-b">${Number(item.price).toFixed(2)}</td>
                   <td className="py-2 px-4 border-b">{item.quantity}</td>
                   <td className="py-2 px-4 border-b">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ${(Number(item.price) * item.quantity).toFixed(2)}
                   </td>
                 </tr>
               ))
